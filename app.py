@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for
 import requests
 import os
 
@@ -16,38 +16,48 @@ def location():
     city = request.form.get('city')
     if not city:
         return render_template('index.html', error=True)
-        
-        try:
-            geo_url = f"https://geocoding-api.open-meteo.com/v1/search?name={city}"
-            geo_resp = requests.get(geo_url).json()
+    try:
+        geo_url = f"https://geocoding-api.open-meteo.com/v1/search?name={city}"
+        geo_resp = requests.get(geo_url).json()
 
-            if "results" in geo_resp and len(geo_resp["results"]) > 0:
-                lat = geo_resp["results"][0]["latitude"]
-                lon = geo_resp["results"][0]["longitude"]
-                return redirect(url_for('weather', city=city, lat=lat, lon=lon))
-            else:
-                print(f"No city found")
+        if "results" in geo_resp and len(geo_resp["results"]) > 0:
+            lat = geo_resp["results"][0]["latitude"]
+            lon = geo_resp["results"][0]["longitude"]
+            return redirect(url_for('weather', city=city, lat=lat, lon=lon))
+        else:
+            print(f"No city found")
+            return render_template('index.html', error=True)
 
-        except Exception as e:
-            print(f"Error occurred: {e}")
+    except Exception as e:
+        print(f"Error occurred: {e}")
+        return render_template('index.html', error=True)
 
 @app.route('/get-weather', methods=['GET'])
-def weather(lat, long):
-    weather_data = None
+def weather():
+    city = request.args.get('city')
+    lat = request.args.get('lat')
+    lon = request.args.get('long')
 
-    params = {
-        "location": f"{lat},{lon}",
-        "apikey": API_KEY
-    }
-    resp = requests.get(URL, params=params).json()
 
-    weather_data = {
-        "city": city.title(),
-        "temperature": resp["data"]["value"]["temperature"],
-        "description": resp["data"]["value"]["weatherCode"],
-    }
+    if not (city and lat and lon):
+        return render_template("index.html", error=True)
+    
+    try:
+        params = {
+            "location": f"{lat},{lon}",
+            "apikey": API_KEY
+        }
+        resp = requests.get(URL, params=params).json()
 
-    return render_template("index.html", weather=weather_data)
+        weather_data = {
+            "city": city.title(),
+            "temperature": resp["data"]["value"]["temperature"],
+            "description": resp["data"]["value"]["weatherCode"],
+        }
+        return render_template("index.html", weather=weather_data)
+    except Exception as e:
+        print(f"Error yay!")
+        return render_template("index.html", error=True)
 
 
 

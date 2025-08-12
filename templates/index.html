@@ -7,12 +7,12 @@
     <link rel="stylesheet" href="{{url_for('static', filename='index.css')}}">
 </head>
 <body>
-    <form method="POST">
+    <form method="POST" action="{{ url_for('location')}}">
         <input type="text" name="city" placeholder="Enter city name">
         <button type="submit">Get Weather</button>
     </form>
 
-    {% if weather}
+    {% if weather %}
         <h2>{{ weather.city }}</h2>
         <p>Temperature: {{ weather.temperature }}°C</p>
         <p>Weather Code: {{ weather.description }}</p>
