@@ -36,7 +36,7 @@ def location():
 def weather():
     city = request.args.get('city')
     lat = request.args.get('lat')
-    lon = request.args.get('long')
+    lon = request.args.get('lon')
 
 
     if not (city and lat and lon):
@@ -51,8 +51,8 @@ def weather():
 
         weather_data = {
             "city": city.title(),
-            "temperature": resp["data"]["value"]["temperature"],
-            "description": resp["data"]["value"]["weatherCode"],
+            "temperature": resp["data"]["values"]["temperature"],
+            "description": resp["data"]["values"]["weatherCode"],
         }
         return render_template("index.html", weather=weather_data)
     except Exception as e:
